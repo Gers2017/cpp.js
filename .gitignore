@@ -1,0 +1,6 @@
+/bin
+/**/*.out
+/ignore
+main.rs
+test.cpp
+test.rs

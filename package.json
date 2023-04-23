@@ -1,0 +1,18 @@
+{
+  "name": "cpp-js",
+  "version": "1.0.0",
+  "description": "C (or maybe not C++) compiler written in Javascript for fun and profit.",
+  "main": "main.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "cpp",
+    "blazingly-fast",
+    "unsafe-rust",
+    "lightspeed"
+  ],
+  "author": "The ultimate life form | kirby",
+  "license": "GPL-3.0-or-later"
+}
