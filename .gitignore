@@ -1,6 +1,8 @@
 /bin
-/**/*.out
 /ignore
+/**/*.out
 *.rs
+*.asm
+*.elf
 test.cpp
 test.rs

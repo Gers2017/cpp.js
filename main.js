@@ -1,6 +1,6 @@
 import { readFileSync } from "fs";
 import { Parser } from "./parser.js";
-import { generate_rust_code } from "./interpreter.js";
+import { generate_fasm_linux, generate_rust_code } from "./interpreter.js";
 
 import {
     is_alpha,
@@ -366,7 +366,8 @@ function _main() {
     const lexer = new Lexer(source);
     const tokens = lexer.scan_tokens();
 
-    const parser = new Parser(tokens);
+    const is_asm = target == TARGETS[1];
+    const parser = new Parser(tokens, { true_newline: is_asm });
     const statements = parser.parse();
 
     switch (target) {
@@ -377,7 +378,7 @@ function _main() {
 
         case TARGETS[1]: // x86_64-fasm-linux-gnu
             filename = filename.replace(".cpp", ".asm");
-        // TODO GENERATE ASM!
+            generate_fasm_linux(filename, statements);
         default:
             break;
     }

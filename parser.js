@@ -25,7 +25,8 @@ const Errors = {
 
 export class Parser {
     /** @param { Token[] } tokens */
-    constructor(tokens) {
+    /** @param { { true_newline: boolean } | undefined } options */
+    constructor(tokens, options) {
         this.tokens = tokens;
         this.index = 0;
         this.back_index = this.tokens.length - 1;
@@ -33,6 +34,10 @@ export class Parser {
          * @type { Stmt[] }
          */
         this.statements = [];
+        this.options = options ?? {
+            // By default use '\\n'. Useful for transpiling to rust
+            true_newline: false,
+        };
     }
 
     is_empty() {
@@ -135,12 +140,14 @@ export class Parser {
         if (token.token_type === TokenType.PRINTF) {
             this.expect(TokenType.PRINTF, Errors.PRINTF_ERR); // skip print
             this.expect(TokenType.LEFT_PAREN, Errors.LEFT_PAREN_ERR); // skip '('
-            const value = this.expect(
-                TokenType.STRING,
-                Errors.STRING_ERR
-            ).value; // get the string!
+            let value = this.expect(TokenType.STRING, Errors.STRING_ERR).value; // get the string!
             this.expect(TokenType.RIGHT_PAREN, Errors.RIGHT_PAREN_ERR); // skip ')'
             this.expect(TokenType.SEMICOLON, Errors.SEMI_COLON_ERR);
+
+            if (this.options.true_newline) {
+                const regex = /\\n/gim;
+                value = value.replace(regex, "\n");
+            }
 
             return new PrintStmt(value);
         } else if (token.token_type === TokenType.RETURN) {
