@@ -1,7 +1,7 @@
 // ------- Parser --------
 
 import { Token, TokenType } from "./main.js";
-import { PrintStmt, ReturnStmt } from "./stuff.js";
+import { PrintStmt, ReturnStmt, Stmt } from "./stuff.js";
 import { panic } from "./utils.js";
 
 const Errors = {

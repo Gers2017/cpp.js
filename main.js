@@ -1,6 +1,7 @@
-import { readFileSync, writeFileSync } from "fs";
+import { readFileSync } from "fs";
 import { Parser } from "./parser.js";
-import { PrintStmt, ReturnStmt } from "./stuff.js";
+import { generate_rust_code } from "./interpreter.js";
+
 import {
     is_alpha,
     is_alphanum,
@@ -8,6 +9,7 @@ import {
     is_whitespace,
     pretty_error,
     panic,
+    exit_rand,
 } from "./utils.js";
 
 // Javascript enums at home
@@ -287,20 +289,76 @@ class Lexer {
     }
 }
 
+const TARGETS = [
+    "rust",
+    "x86_64-fasm-linux-gnu",
+    // "x86_64-fasm-windows"
+];
+
 try {
     _main();
 } catch (e) {
     console.error(e);
 }
 
+function check_next_arg(arg, next_arg) {
+    if (next_arg === null && !next_arg.startsWith("-")) {
+        console.error(`Missing or invalid value for flag "${arg}"`);
+        exit_rand();
+    }
+
+    return true;
+}
+
+function print_usage() {
+    console.log("Cpp.js");
+    console.log("USAGE:");
+    console.log("  node cpp.js <filename>");
+    console.log("  node cpp.js <filename> --target <target>");
+    console.log("  node cpp.js --target list");
+    console.log("  node cpp.js --help");
+    console.log();
+    console.log("  <filename>: The cpp file to compile");
+    console.log("  <target>: The target platform");
+}
+
 function _main() {
     const CPP_REGEX = /.\.cpp/i;
     const args = process.argv;
-    let filename = "main.cpp";
 
-    for (const arg of args) {
+    let filename = "main.cpp";
+    let target = TARGETS[0]; // default target is rust
+
+    for (let i = 0; i < args.length; i++) {
+        const arg = args[i];
+        const next_arg = i + 1 < args.length ? args[i + 1] : null;
+
+        if (arg === "--help") {
+            print_usage();
+            process.exit(0);
+        }
+
         if (CPP_REGEX.test(arg)) {
             filename = arg;
+        }
+
+        if (arg === "--target" && check_next_arg(arg, next_arg)) {
+            if (next_arg === "list") {
+                console.log("Valid targets:");
+                for (const target of TARGETS) {
+                    console.log(target);
+                }
+                process.exit(0);
+            }
+
+            if (!TARGETS.includes(next_arg)) {
+                console.error(
+                    `Unknown target "${next_arg}\nMaybe try: --target list`
+                );
+                exit_rand();
+            }
+
+            target = next_arg;
         }
     }
 
@@ -308,25 +366,19 @@ function _main() {
     const lexer = new Lexer(source);
     const tokens = lexer.scan_tokens();
 
-    // console.log(lexer.tokens);
-
     const parser = new Parser(tokens);
     const statements = parser.parse();
 
-    const output = [];
-    output.push("fn main() {");
+    switch (target) {
+        case TARGETS[0]: // rust
+            filename = filename.replace(".cpp", ".rs");
+            generate_rust_code(filename, statements);
+            break;
 
-    for (const stmt of statements) {
-        if (stmt instanceof PrintStmt) {
-            output.push(`\tprint!("${stmt.string}");`);
-        } else if (stmt instanceof ReturnStmt) {
-            output.push(`\tstd::process::exit(${stmt.value});`);
-        }
+        case TARGETS[1]: // x86_64-fasm-linux-gnu
+            filename = filename.replace(".cpp", ".asm");
+        // TODO GENERATE ASM!
+        default:
+            break;
     }
-
-    output.push("}\n");
-    const text = output.join("\n");
-
-    filename = filename.replace("cpp", "rs");
-    writeFileSync(filename, text);
 }

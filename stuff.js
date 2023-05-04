@@ -1,12 +1,4 @@
-export class AST {}
 export class Stmt {}
-
-export class Block extends AST {
-    constructor(stmts) {
-        super();
-        this.stmts = stmts;
-    }
-}
 
 export class PrintStmt extends Stmt {
     /**
@@ -37,23 +29,26 @@ export class IfStmt extends Stmt {}
 
 export class ElseStmt extends Stmt {}
 
-export class Expr {}
+export class AST {}
 
-export class EqualsExpr {
-    constructor(a, b) {
-        this.a = a;
-        this.b = b;
+export class Block extends AST {
+    constructor(stmts) {
+        super();
+        this.stmts = stmts;
     }
 }
 
-export class Num {
+export class NumberNode extends AST {
     constructor(value) {
+        super();
         this.value = value;
     }
 }
 
-export class FunctionDeclaration extends Stmt {
-    constructor(name, params, body) {
+export class BinaryExpr extends AST {
+    constructor(left, right) {
         super();
+        this.left = left;
+        this.right = right;
     }
 }
