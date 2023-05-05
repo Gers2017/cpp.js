@@ -15,10 +15,34 @@ Because I had no other choice.
 
 ```sh
 # node main.js <file>.cpp
-node main.js main.cpp # compiles a main.cpp file to rust
+# compiles main.cpp to main.rs
+node main.js main.cpp
+
+# compiles main.cpp to main.asm
+# run node main.js --target list for valid targets
+node main.js main.cpp --target x86_64-fasm-linux-gnu
+
+# for more details
+node main.js --help
 ```
 
-## Test rust code
+## Makefile
+
+Build main.rs and run
+
+```sh
+make build-rs
+make run
+```
+
+Build main.asm and run
+
+```sh
+make build-fasm
+make run-fasm
+```
+
+## Test rust code manually
 
 ```sh
 # rustc <file>.rs -o <file>.out
@@ -28,7 +52,7 @@ rustc main.rs -o main.out
 ## Support
 
 -   [ ] `//` comments
--   [ ] `printf("...");`
+-   [ ] `printf("...");` it doesn't support more arguments (`printf("%d", 10)` doesn't work)
 -   [ ] `return`
 
 ```cpp
